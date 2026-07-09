@@ -1,2 +1,2 @@
 # 2026-CCISC
-Code is published now。
+Code is published now.
