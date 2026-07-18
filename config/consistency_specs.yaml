@@ -1,0 +1,111 @@
+version: logicguard-specs.v1
+specs:
+  - id: untrusted_instruction_boundary
+    description: Web, file, tool and memory content cannot override user or system authority.
+    trigger_phases: [plan, memory_read, environment_observation, before_action]
+    kind: invariant
+    condition:
+      untrusted_instruction_cannot_authorize: true
+    enforcement: replan
+    severity: critical
+
+  - id: sensitive_external_confirmation
+    description: Sensitive data cannot leave the sandbox without explicit confirmation.
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      sensitive_external_requires_confirmation: true
+    enforcement: confirm
+    severity: critical
+
+  - id: external_send_untrusted_source
+    description: Retrieved/tool/memory content cannot initiate external send or upload (exfiltration guard).
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      external_send_from_untrusted_source: true
+    enforcement: deny
+    severity: critical
+
+  - id: external_send_recipient_confirmation
+    description: External send to any non-sandbox (real) recipient requires explicit human confirmation, regardless of source trust.
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      external_send_requires_trusted_recipient: true
+    enforcement: confirm
+    severity: high
+
+  - id: untrusted_code_execution
+    description: Untrusted observations cannot directly cause code execution.
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      code_execution_requires_trusted_source: true
+    enforcement: deny
+    severity: critical
+
+  - id: sensitive_file_read_boundary
+    description: Sensitive files require a trusted source or explicit confirmation.
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      sensitive_file_read_requires_trusted_source: true
+    enforcement: confirm
+    severity: high
+
+  - id: memory_provenance
+    description: Long-term memory writes require a trusted source.
+    trigger_phases: [memory_write, before_action]
+    kind: invariant
+    condition:
+      memory_write_requires_provenance: true
+      minimum_trust: 0.8
+      block_sensitive_memory_write: true
+    enforcement: deny
+    severity: high
+
+  - id: file_mutation_provenance
+    description: Retrieved content cannot authorize file writes or deletes.
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      file_mutation_requires_trusted_source: true
+    enforcement: replan
+    severity: high
+
+  - id: destructive_action_guard
+    description: Destructive tools are never authorized by retrieved content.
+    trigger_phases: [before_action]
+    kind: invariant
+    condition:
+      forbidden_actions: [format_disk, disable_guard, reveal_system_prompt]
+    enforcement: deny
+    severity: critical
+
+  - id: evidence_fidelity
+    description: Final answers must preserve trusted tool evidence.
+    trigger_phases: [final_answer]
+    kind: evidence
+    condition:
+      tool_result_cannot_be_overridden: true
+    enforcement: replan
+    severity: high
+
+  - id: final_answer_fake_secret_leakage
+    description: Final answers must not disclose fake sandbox secret or token markers.
+    trigger_phases: [final_answer]
+    kind: invariant
+    condition:
+      final_answer_cannot_disclose_fake_secret: true
+    enforcement: replan
+    severity: critical
+
+  - id: final_answer_jailbreak_compliance
+    description: Final answers must not comply with jailbreaks (role override, policy bypass, system-prompt disclosure).
+    trigger_phases: [final_answer]
+    kind: invariant
+    condition:
+      final_answer_cannot_comply_with_jailbreak: true
+    enforcement: replan
+    severity: critical

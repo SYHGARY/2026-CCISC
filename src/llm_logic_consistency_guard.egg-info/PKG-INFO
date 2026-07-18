@@ -1,0 +1,173 @@
+Metadata-Version: 2.4
+Name: llm-logic-consistency-guard
+Version: 1.0.0
+Summary: Logic consistency verification, proactive risk prediction and runtime enforcement for LLM agents.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi<1,>=0.115
+Requires-Dist: uvicorn<1,>=0.30
+Requires-Dist: pydantic<3,>=2.10
+Requires-Dist: PyYAML<7,>=6
+Requires-Dist: httpx<1,>=0.27
+Provides-Extra: solver
+Requires-Dist: z3-solver<5,>=4.13; extra == "solver"
+Provides-Extra: nli
+Requires-Dist: transformers<5,>=4.45; extra == "nli"
+Requires-Dist: torch<3,>=2.4; extra == "nli"
+Requires-Dist: sentencepiece<1,>=0.2; extra == "nli"
+Provides-Extra: langgraph
+Requires-Dist: langgraph<2,>=1.2; extra == "langgraph"
+Requires-Dist: langgraph-checkpoint-sqlite<4,>=3; extra == "langgraph"
+Provides-Extra: all
+Requires-Dist: z3-solver<5,>=4.13; extra == "all"
+Requires-Dist: transformers<5,>=4.45; extra == "all"
+Requires-Dist: torch<3,>=2.4; extra == "all"
+Requires-Dist: sentencepiece<1,>=0.2; extra == "all"
+Requires-Dist: langgraph<2,>=1.2; extra == "all"
+Requires-Dist: langgraph-checkpoint-sqlite<4,>=3; extra == "all"
+
+# LogicGuard
+
+LogicGuard is a competition-oriented safety supervision system for tool-using LLM agents. It combines logic-consistency verification, predictive trajectory risk, real-time intervention, and closed-loop repair.
+
+Chinese documentation: [README_ZH.md](README_ZH.md)
+
+## What It Delivers
+
+- Unified observable events for user input, plans, memories, observations, tool calls, results, and final answers.
+- YAML policy DSL, provenance-aware Claim Graph, structured constraint solver, and optional multilingual NLI.
+- DTMC-based K-step unsafe-state prediction with a PAC uncertainty upper bound.
+- `allow`, `audit`, `confirm`, `deny`, and `replan` decisions before external actions execute.
+- Sandboxed file, email, HTTP API, code execution, and long-term-memory tools.
+- Prompt-injection, memory-poisoning, and environment-pollution attack labs.
+- FastAPI, WebSocket trace streaming, framework-neutral runtime API, and a LangGraph adapter.
+- A DeepSeek-powered LangGraph office workflow with Supervisor, Planner,
+  Research, Action, Verifier, and Response agents.
+- SQLite LangGraph checkpoints and resumable human confirmation.
+- A live supervision console, 350-run automated experiment, expanded red-team replay, ablation study, and submission materials.
+
+## Quick Start
+
+The zero-key deterministic demo uses the current-machine core environment:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_environment.ps1
+.\verify.cmd
+.\run_demo.cmd
+```
+
+Open `http://127.0.0.1:8765`.
+
+The setup script creates `.venv_local` and installs the core, solver,
+LangGraph, FastAPI, and Uvicorn dependencies. Transformer NLI and Torch remain
+optional; enable them only when the model-backed NLI tests or runtime are
+needed.
+
+The multi-agent workspace is available at
+`http://127.0.0.1:8765/console/agent.html`. Configure DeepSeek only through
+the process environment:
+
+```powershell
+$env:DEEPSEEK_API_KEY="your-rotated-key"
+$env:DEEPSEEK_MODEL="deepseek-v4-flash"
+.\run_demo.cmd
+```
+
+Run the security experiment and ablation separately:
+
+```powershell
+.\.venv_local\Scripts\python.exe scripts\run_office_suite.py --limit 20
+.\.venv_local\Scripts\python.exe scripts\train_probabilistic_monitor.py
+.\.venv_local\Scripts\python.exe scripts\run_stage3_evaluation.py
+.\.venv_local\Scripts\python.exe scripts\run_redteam_benchmark.py
+.\.venv_local\Scripts\python.exe scripts\prepare_annotation_packet.py
+.\.venv_local\Scripts\python.exe scripts\run_security_experiments.py
+.\.venv_local\Scripts\python.exe scripts\run_ablation.py
+```
+
+The probabilistic training command creates an independent train/validation/test
+split, learns a valid-transition-aware smoothed DTMC, calibrates the intervention
+threshold under an FPR constraint, and writes PAC sampling diagnostics to
+`outputs/probabilistic_training_report.json`.
+
+Enable the downloaded multilingual Transformer NLI backend for the API and
+LangGraph runtime:
+
+```powershell
+$env:LOGICGUARD_ENABLE_TRANSFORMERS="1"
+$env:LOGICGUARD_NLI_LOCAL_ONLY="1"
+.\run_demo.cmd
+```
+
+`run_stage3_evaluation.py` calibrates the NLI threshold and writes it to
+`config/nli_config.json`. Complex claim extraction through DeepSeek is optional
+and enabled with `LOGICGUARD_ENABLE_LLM_CLAIMS=1`.
+
+Run the FastAPI service when Uvicorn is installed:
+
+```powershell
+python scripts\run_api.py
+```
+
+## Core Flow
+
+```text
+Agent event
+  -> provenance and trust normalization
+  -> DSL + Claim Graph + solver + semantic checks
+  -> DTMC/PAC future-risk estimate
+  -> allow / audit / confirm / deny / replan
+  -> sandbox tool or safe alternative
+  -> repair and full re-check
+  -> SQLite audit record + WebSocket update
+```
+
+## Reproducible Results
+
+The included deterministic sandbox experiment runs 350 tasks:
+
+| Metric | Result |
+|---|---:|
+| Unguarded attack success rate | 100% |
+| Guarded attack success rate | 0% |
+| Attack block rate | 100% |
+| Normal-task completion | 100% |
+| Average supervision latency | about 26.8 ms |
+| Advance-warning coverage | 100% |
+
+These results cover 15 attack variants and 5 normal sandbox variants. They demonstrate reproducibility of the implemented loop, not production or open-world generalization. The older handcrafted 1.0-F1 datasets remain available only as `legacy_baseline` regression checks.
+
+## Optional Backends
+
+The default implementation works without an API key and without model downloads. Optional extras add:
+
+```powershell
+pip install -e ".[solver]"     # Z3
+pip install -e ".[nli]"        # Transformers NLI
+pip install -e ".[langgraph]"  # LangGraph
+```
+
+If an optional backend is unavailable, LogicGuard reports the active deterministic fallback rather than pretending the backend ran.
+
+## Main Paths
+
+- `src/llm_logic_guard/`: consistency kernel, predictor, runtime, attacks, storage, and API.
+- `config/consistency_specs.yaml`: competition policy DSL.
+- `data/redteam_attack_catalog.json`: expanded normal/adversarial red-team catalog.
+- `data/annotation_seed.jsonl`: human-annotation seed packet.
+- `demo/`: supervision console.
+- `outputs/competition_experiment.json`: 350-run metrics.
+- `outputs/redteam_benchmark_report.json`: expanded red-team metrics.
+- `outputs/redteam_replay.jsonl`: attack replay records.
+- `outputs/logicguard_dtmc.json`: trained DTMC, calibrated threshold, and PAC metadata.
+- `outputs/probabilistic_training_report.json`: held-out probabilistic evaluation.
+- `data/stage3_consistency_benchmark.jsonl`: 240 bilingual consistency cases.
+- `outputs/stage3_evaluation_report.json`: NLI/Z3/hybrid held-out results.
+- `outputs/ablation_report.json`: ablation results.
+- `docs/SECURITY_RISK_ANALYSIS.md`: attack and defense report.
+- `docs/EXPERIMENT_REPORT.md`: evaluation protocol and limitations.
+- `submission/`: report, pitch deck, manifest, and final package.
+
+## Clean-room Boundary
+
+The neighboring `security` project is proprietary. LogicGuard does not copy its code. The project reimplements the relevant ideas through public AgentSpec/Pro2Guard concepts and its own interfaces, tests, policies, and runtime.

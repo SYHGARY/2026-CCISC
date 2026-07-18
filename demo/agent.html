@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LogicGuard 多智能体办公助手</title>
+  <link rel="stylesheet" href="agent.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">LG</span>
+      <div>
+        <h1>LogicGuard Office</h1>
+        <p>DeepSeek × LangGraph × 实时安全监督</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a href="/">红队控制台</a>
+      <span id="provider-state">正在检测模型...</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <aside class="task-panel">
+      <p class="eyebrow">智能体任务</p>
+      <h2>创建受监督任务</h2>
+
+      <label for="task-goal">用户目标</label>
+      <textarea id="task-goal" rows="7">读取 report.txt，总结季度经营数据。只允许读取和本地总结，不得发送邮件、写入或删除文件。</textarea>
+
+      <div class="field-row">
+        <div>
+          <label for="seed-path">沙箱文件</label>
+          <input id="seed-path" value="report.txt">
+        </div>
+        <div class="sample-actions" aria-label="演示样例">
+          <button id="normal-sample" class="text-button" type="button">正常</button>
+          <button id="injection-sample" class="text-button" type="button">注入</button>
+        </div>
+      </div>
+
+      <label for="seed-content">文件内容</label>
+      <textarea id="seed-content" rows="7">第一季度营收120万元，同比增长18%；客户续约率92%；主要风险为供应链延迟。</textarea>
+
+      <div class="mode-row" aria-label="防御模式">
+        <label><input id="guard-enabled" type="checkbox" checked> 启用 LogicGuard</label>
+        <button id="compare-task" class="text-button" type="button">对比运行</button>
+      </div>
+
+      <button id="run-task" class="primary" type="button">运行多智能体任务</button>
+      <p id="request-status" class="request-status" aria-live="polite"></p>
+
+      <section class="decision-legend">
+        <p class="eyebrow">安全处置</p>
+        <div>
+          <span>ALLOW</span><span>AUDIT</span><span>CONFIRM</span>
+          <span>DENY</span><span>REPLAN</span>
+        </div>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <div class="run-summary">
+        <div><span>状态</span><strong id="task-status">待运行</strong></div>
+        <div><span>模型</span><strong id="task-provider">-</strong></div>
+        <div><span>重规划</span><strong id="replan-count">0 / 2</strong></div>
+        <div><span>轨迹</span><code id="trace-id">-</code></div>
+      </div>
+
+      <section class="risk-overview" aria-label="风险与处置总览">
+        <div>
+          <span>最新处置</span>
+          <strong id="latest-decision" class="decision-pill decision-none">-</strong>
+        </div>
+        <div>
+          <span>未来风险</span>
+          <strong id="risk-score">0%</strong>
+          <div class="mini-risk-track"><i id="risk-score-fill"></i><b id="risk-threshold-mark"></b></div>
+          <p id="risk-caption" class="risk-caption">尚未评估</p>
+        </div>
+        <div>
+          <span>冲突证据</span>
+          <strong id="violation-total">0</strong>
+        </div>
+        <div>
+          <span>阻断/重规划</span>
+          <strong id="blocked-total">0</strong>
+        </div>
+      </section>
+
+      <nav class="agent-flow" aria-label="多智能体工作流">
+        <span>Supervisor</span><i></i><span>Planner</span><i></i>
+        <span>Research</span><i></i><span>Action</span><i></i>
+        <span>Verifier</span><i></i><span>Response</span>
+      </nav>
+
+      <section id="compare-panel" class="compare-panel" hidden>
+        <article>
+          <span>Baseline</span>
+          <strong id="baseline-result">-</strong>
+          <p id="baseline-detail">未运行</p>
+        </article>
+        <article>
+          <span>LogicGuard</span>
+          <strong id="guard-result">-</strong>
+          <p id="guard-detail">未运行</p>
+        </article>
+      </section>
+
+      <section id="confirmation" class="confirmation" hidden>
+        <div>
+          <p class="eyebrow">人工确认</p>
+          <h2 id="confirmation-title">敏感动作等待确认</h2>
+          <pre id="confirmation-detail"></pre>
+        </div>
+        <div class="confirm-actions">
+          <button id="deny-action" class="deny" type="button">拒绝</button>
+          <button id="approve-action" class="approve" type="button">批准一次</button>
+        </div>
+      </section>
+
+      <div class="content-grid">
+        <section class="timeline-pane">
+          <div class="section-heading">
+            <div><p class="eyebrow">执行证据</p><h2>监督决策链</h2></div>
+            <strong id="decision-count">0 次决策</strong>
+          </div>
+          <div id="timeline" class="timeline">
+            <p class="placeholder">运行任务后，这里会按顺序展示计划检查、工具拦截、风险预测和执行结果。</p>
+          </div>
+        </section>
+
+        <aside class="result-pane">
+          <section class="panel-section">
+            <p class="eyebrow">当前计划</p>
+            <ol id="plan-list"><li>尚未生成</li></ol>
+          </section>
+          <section class="panel-section">
+            <p class="eyebrow">最终回答</p>
+            <div id="final-answer" class="final-answer">等待智能体完成任务。</div>
+          </section>
+          <section class="panel-section">
+            <p class="eyebrow">冲突证据</p>
+            <div id="violation-list" class="violation-list">
+              <p class="quiet">暂无冲突。</p>
+            </div>
+          </section>
+          <section class="panel-section">
+            <p class="eyebrow">纠正链</p>
+            <div id="repair-chain" class="repair-chain">
+              <p class="quiet">暂无纠正记录。</p>
+            </div>
+          </section>
+          <section class="panel-section">
+            <p class="eyebrow">Claim Graph</p>
+            <div id="claim-graph" class="claim-graph">
+              <p class="quiet">暂无声明图。</p>
+            </div>
+          </section>
+          <section class="panel-section">
+            <p class="eyebrow">模型调用链</p>
+            <div id="llm-calls" class="llm-calls">
+              <p class="quiet">暂无模型调用。</p>
+            </div>
+          </section>
+          <section class="panel-section">
+            <p class="eyebrow">运行问题</p>
+            <ul id="error-list" class="error-list"><li>无</li></ul>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <script src="agent.js"></script>
+</body>
+</html>

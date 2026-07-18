@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://logicguard.local/schemas/deepseek_extended_case_schema.json",
+  "title": "LogicGuard Extended DeepSeek Evaluation Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "sample_type",
+    "category",
+    "attack_surface",
+    "user_prompt",
+    "expected_risk",
+    "expected_guard_behavior",
+    "expected_safe_behavior",
+    "success_criteria",
+    "failure_criteria",
+    "tool_expected",
+    "source_trust",
+    "requires_memory",
+    "requires_file",
+    "requires_code",
+    "requires_external_send",
+    "boundary_reason",
+    "notes"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "pattern": "^(atk|norm|hard)_[a-z0-9_]+$",
+      "description": "Stable unique identifier. Prefix must match sample_type: atk, norm, or hard."
+    },
+    "sample_type": {
+      "type": "string",
+      "enum": [
+        "attack",
+        "normal",
+        "hard_normal"
+      ],
+      "description": "Attack cases test defense effectiveness; normal and hard_normal cases test false positives and usability."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "prompt_injection",
+        "jailbreak",
+        "tool_hijacking",
+        "dangerous_code_execution",
+        "file_access_overwrite",
+        "sensitive_information_leakage",
+        "memory_poisoning",
+        "environment_pollution",
+        "multi_agent_error_propagation",
+        "normal",
+        "hard_normal"
+      ],
+      "description": "Primary category used for stratified selection and reporting."
+    },
+    "attack_surface": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "prompt_injection",
+          "jailbreak",
+          "tool_hijacking",
+          "dangerous_code_execution",
+          "file_access_overwrite",
+          "sensitive_information_leakage",
+          "memory_poisoning",
+          "environment_pollution",
+          "multi_agent_error_propagation",
+          "normal",
+          "hard_normal"
+        ]
+      },
+      "description": "One or more surfaces touched by this case. Multi-surface attacks should list every relevant surface."
+    },
+    "user_prompt": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The user-visible task prompt. For generated datasets this should be safe, sandboxed, and free of real secrets."
+    },
+    "expected_risk": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Expected risk if the model follows the unsafe path."
+    },
+    "expected_guard_behavior": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow",
+          "audit",
+          "confirm",
+          "deny",
+          "replan",
+          "inspect",
+          "sanitize",
+          "quarantine_memory",
+          "redact_output"
+        ]
+      },
+      "description": "Expected Guard-level behavior for the case."
+    },
+    "expected_safe_behavior": {
+      "type": "string",
+      "minLength": 1,
+      "description": "What the guarded agent should do to complete or safely refuse the task."
+    },
+    "success_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "For attack cases, concrete conditions that count as attack success. For normal/hard_normal, concrete completion criteria."
+    },
+    "failure_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "For attack cases, conditions proving safe defense. For normal/hard_normal, conditions that count as false positive or task failure."
+    },
+    "tool_expected": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "none",
+          "read_file",
+          "write_file",
+          "delete_file",
+          "send_email",
+          "api_call",
+          "execute_code",
+          "inspect_code",
+          "arithmetic_sandbox",
+          "memory_read",
+          "memory_write",
+          "browser_read",
+          "agent_handoff"
+        ]
+      },
+      "description": "Expected benign tools or risky tools needed by the case. Use none for direct-answer cases."
+    },
+    "source_trust": {
+      "type": "string",
+      "enum": [
+        "user",
+        "trusted_policy",
+        "sandbox_file",
+        "untrusted_file",
+        "tool_result",
+        "api_result",
+        "web_content",
+        "memory",
+        "multi_agent_handoff",
+        "mixed"
+      ],
+      "description": "Dominant source/provenance for the instruction or evidence that drives the case."
+    },
+    "requires_memory": {
+      "type": "boolean",
+      "description": "Whether the case requires memory read/write behavior."
+    },
+    "requires_file": {
+      "type": "boolean",
+      "description": "Whether the case requires file read/write/delete behavior."
+    },
+    "requires_code": {
+      "type": "boolean",
+      "description": "Whether the case requires code inspection or execution behavior."
+    },
+    "requires_external_send": {
+      "type": "boolean",
+      "description": "Whether the case requires email, API post, or another external-send-like action."
+    },
+    "boundary_reason": {
+      "type": "string",
+      "description": "Required for hard_normal cases; explains why the risky-looking task is legitimate and safe. Use empty string for attack and normal cases."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Auditor notes, paired-control links, or generation constraints. Must not contain real API keys or real secrets."
+    },
+    "quality_tags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional quality and coverage labels for later benchmark selection."
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Optional risk level used for candidate-pool selection and real-evaluation priority."
+    },
+    "real_priority": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Optional 1-5 priority score for later real-model selection."
+    },
+    "variant_family": {
+      "type": "string",
+      "description": "Optional variant family name used for deduplication and coverage balancing."
+    },
+    "is_core_case": {
+      "type": "boolean",
+      "description": "Whether this case preserves an existing core case from data/deepseek_batch_cases.json."
+    },
+    "source_dataset": {
+      "type": "string",
+      "description": "Source dataset or generator that produced this case."
+    }
+  }
+}

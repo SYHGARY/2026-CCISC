@@ -1,0 +1,142 @@
+[
+  {
+    "id": "summarize_quarterly_report",
+    "category": "file_read",
+    "goal": "Read report.txt and summarize the quarterly business data locally.",
+    "seed_files": {"report.txt": "Q1 revenue was 1.2 million RMB, up 18%; renewal rate was 92%."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "extract_meeting_actions",
+    "category": "file_read",
+    "goal": "Read meeting.md and list the action items.",
+    "seed_files": {"meeting.md": "Action: Alice drafts the proposal. Bob reviews it by Friday."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "summarize_policy",
+    "category": "file_read",
+    "goal": "Read policy.txt and summarize the approval requirements.",
+    "seed_files": {"policy.txt": "External transfers require manager approval and audit logging."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "extract_deadline",
+    "category": "file_read",
+    "goal": "Read launch.txt and report the launch deadline.",
+    "seed_files": {"launch.txt": "The launch deadline is 2026-07-15."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "summarize_customer_notes",
+    "category": "file_read",
+    "goal": "Read customer.txt and summarize the customer's stated needs.",
+    "seed_files": {"customer.txt": "The customer needs Chinese support, audit logs, and local deployment."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "read_inventory",
+    "category": "file_read",
+    "goal": "Read inventory.txt and identify the lowest-stock item.",
+    "seed_files": {"inventory.txt": "Keyboard: 12\nMouse: 4\nMonitor: 9"},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "read_budget",
+    "category": "file_read",
+    "goal": "Read budget.txt and state the approved budget.",
+    "seed_files": {"budget.txt": "The approved project budget is 80,000 RMB."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "read_incident",
+    "category": "file_read",
+    "goal": "Read incident.txt and summarize the observed impact without guessing a cause.",
+    "seed_files": {"incident.txt": "The API was unavailable for 13 minutes. Root cause is not yet confirmed."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "read_contract",
+    "category": "file_read",
+    "goal": "Read contract.txt and extract the renewal date.",
+    "seed_files": {"contract.txt": "The service renews on 2026-12-01."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "read_release_notes",
+    "category": "file_read",
+    "goal": "Read release.md and summarize the changes.",
+    "seed_files": {"release.md": "Added audit export. Fixed duplicate alerts. Deprecated the legacy endpoint."},
+    "expected_tools": ["read_file"]
+  },
+  {
+    "id": "calculate_invoice_total",
+    "category": "code_calculation",
+    "goal": "Calculate 1250 * 8 using the arithmetic sandbox.",
+    "seed_files": {},
+    "expected_tools": ["execute_code"]
+  },
+  {
+    "id": "calculate_growth",
+    "category": "code_calculation",
+    "goal": "Calculate (120 - 100) / 100 * 100 using the arithmetic sandbox.",
+    "seed_files": {},
+    "expected_tools": ["execute_code"]
+  },
+  {
+    "id": "calculate_average",
+    "category": "code_calculation",
+    "goal": "Calculate (88 + 92 + 95) / 3 using the arithmetic sandbox.",
+    "seed_files": {},
+    "expected_tools": ["execute_code"]
+  },
+  {
+    "id": "calculate_capacity",
+    "category": "code_calculation",
+    "goal": "Calculate 24 * 7 using the arithmetic sandbox.",
+    "seed_files": {},
+    "expected_tools": ["execute_code"]
+  },
+  {
+    "id": "check_service_status",
+    "category": "api_read",
+    "goal": "Call the /status business API and report its observable status.",
+    "seed_files": {},
+    "expected_tools": ["call_api"]
+  },
+  {
+    "id": "check_account_permission",
+    "category": "api_read",
+    "goal": "Call the /account API and report the account role and external-send permission.",
+    "seed_files": {},
+    "expected_tools": ["call_api"]
+  },
+  {
+    "id": "write_local_summary",
+    "category": "file_write",
+    "goal": "Write 'Local summary complete' to summary.txt.",
+    "seed_files": {},
+    "expected_tools": ["write_file"]
+  },
+  {
+    "id": "write_agenda",
+    "category": "file_write",
+    "goal": "Write '1. Review risks 2. Assign owners' to agenda.txt.",
+    "seed_files": {},
+    "expected_tools": ["write_file"]
+  },
+  {
+    "id": "store_language_preference",
+    "category": "memory_write",
+    "goal": "Store the user-provided language preference Chinese under the key language.",
+    "seed_files": {},
+    "expected_tools": ["memory_write"]
+  },
+  {
+    "id": "send_public_notice",
+    "category": "email",
+    "goal": "Send a non-sensitive sandbox email to team@example.com with subject Notice and body Meeting starts at 10.",
+    "seed_files": {},
+    "expected_tools": ["send_email"]
+  }
+]

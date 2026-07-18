@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LogicGuard 监督控制台</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">LG</span>
+      <div>
+        <h1>LogicGuard</h1>
+        <p>智能体安全行为监督控制台</p>
+      </div>
+    </div>
+    <div class="runtime-status"><span></span> 监督运行时在线</div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="control-panel">
+      <section>
+        <p class="eyebrow">红队任务</p>
+        <h2>攻击回放</h2>
+        <label for="scenario-select">场景</label>
+        <select id="scenario-select"></select>
+        <div id="scenario-meta" class="scenario-meta"></div>
+        <label class="toggle-row">
+          <input id="guard-toggle" type="checkbox" checked>
+          <span>启用 LogicGuard</span>
+        </label>
+        <button id="run-button" class="primary-button" type="button">
+          <span aria-hidden="true">▶</span> 运行任务
+        </button>
+        <button id="compare-button" class="secondary-button" type="button">
+          对比有无防御
+        </button>
+        <p id="request-status" class="request-status" aria-live="polite"></p>
+      </section>
+
+      <section class="policy-section">
+        <p class="eyebrow">处置策略</p>
+        <div class="policy-list">
+          <span>ALLOW</span><span>AUDIT</span><span>CONFIRM</span><span>DENY</span><span>REPLAN</span>
+        </div>
+      </section>
+    </aside>
+
+    <section class="monitor">
+      <div class="metric-band">
+        <div><span>任务数</span><strong id="metric-tasks">90</strong></div>
+        <div><span>无防御 ASR</span><strong id="metric-open">100%</strong></div>
+        <div><span>防御后 ASR</span><strong id="metric-guard">0%</strong></div>
+        <div><span>正常完成率</span><strong id="metric-completion">100%</strong></div>
+        <div><span>平均延迟</span><strong id="metric-latency">-</strong></div>
+      </div>
+
+      <div id="empty-state" class="empty-state">
+        <div class="empty-diagram" aria-hidden="true">
+          <span>输入</span><i></i><span>规划</span><i></i><span>工具</span><i></i><span>结果</span>
+        </div>
+        <h2>选择场景并运行任务</h2>
+      </div>
+
+      <div id="workspace" class="workspace" hidden>
+        <section class="trace-pane">
+          <div class="section-heading">
+            <div><p class="eyebrow">实时轨迹</p><h2>事件时间线</h2></div>
+            <span id="trace-id" class="mono-label"></span>
+          </div>
+          <div id="timeline" class="timeline"></div>
+        </section>
+
+        <aside class="inspection-pane">
+          <section class="decision-section">
+            <p class="eyebrow">运行决策</p>
+            <div class="decision-line">
+              <strong id="decision-badge">-</strong>
+              <span id="execution-state">-</span>
+            </div>
+            <ul id="decision-reasons" class="reason-list"></ul>
+          </section>
+
+          <section>
+            <div class="section-heading compact">
+              <div><p class="eyebrow">未来风险</p><h2>PAC 风险上界</h2></div>
+              <strong id="risk-value">0%</strong>
+            </div>
+            <div class="risk-track"><div id="risk-fill"></div><i id="risk-threshold"></i></div>
+            <div id="risk-features" class="feature-grid"></div>
+          </section>
+
+          <section>
+            <p class="eyebrow">冲突证据</p>
+            <div id="violations" class="violations"></div>
+          </section>
+        </aside>
+      </div>
+
+      <section id="comparison" class="comparison" hidden>
+        <div><span>无防御</span><strong id="compare-open">-</strong></div>
+        <div class="comparison-arrow">→</div>
+        <div><span>LogicGuard</span><strong id="compare-guard">-</strong></div>
+      </section>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
