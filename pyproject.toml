@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-logic-consistency-guard"
+version = "1.0.0"
+description = "Logic consistency verification, proactive risk prediction and runtime enforcement for LLM agents."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.30,<1",
+  "pydantic>=2.10,<3",
+  "PyYAML>=6,<7",
+  "httpx>=0.27,<1",
+]
+
+[project.optional-dependencies]
+solver = ["z3-solver>=4.13,<5"]
+nli = [
+  "transformers>=4.45,<5",
+  "torch>=2.4,<3",
+  "sentencepiece>=0.2,<1",
+]
+langgraph = [
+  "langgraph>=1.2,<2",
+  "langgraph-checkpoint-sqlite>=3,<4",
+]
+all = [
+  "z3-solver>=4.13,<5",
+  "transformers>=4.45,<5",
+  "torch>=2.4,<3",
+  "sentencepiece>=0.2,<1",
+  "langgraph>=1.2,<2",
+  "langgraph-checkpoint-sqlite>=3,<4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
